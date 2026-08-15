@@ -1,6 +1,7 @@
 import cv2 
 import mediapipe as mp
 from Finger_counter import FingerCounter
+from gesture_detector import GestureDetector
 # camera input 
 cap= cv2.VideoCapture(0)
 
@@ -28,6 +29,7 @@ cv2.namedWindow(window_name)
 frame_timestamp = 0
 
 counter=FingerCounter()
+gesture_detector = GestureDetector()
 
 
 while True:
@@ -63,6 +65,7 @@ while True:
 
        for i, hand in enumerate(result.hand_landmarks):
 
+ 
       
             # Get Left / Right
             handedness = result.handedness[i][0].category_name
@@ -71,8 +74,12 @@ while True:
             # Count fingers
             finger_count = counter.count_fingers(
                 hand,
-                handedness
-            )
+                handedness)
+            
+                #the hand Gesture 
+            gesture = gesture_detector.detect_gesture(
+                finger_count)
+            
 
  # Draw landmarks
             for landmark in hand:
@@ -101,7 +108,14 @@ while True:
                 (0, 255, 0),
                 3
             )
-        
+                cv2.putText(
+                frame,gesture,
+                (50, 150 + i * 100),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.2,
+                (255, 0, 255),
+                3)
+                
        
 
 
