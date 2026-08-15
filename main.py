@@ -1,6 +1,6 @@
 import cv2 
 import mediapipe as mp
-
+from Finger_counter import FingerCounter
 # camera input 
 cap= cv2.VideoCapture(0)
 
@@ -27,6 +27,9 @@ cv2.namedWindow(window_name)
 
 frame_timestamp = 0
 
+counter=FingerCounter()
+
+
 while True:
     success, frame=cap.read()
 
@@ -50,16 +53,28 @@ while True:
         mp_image,
         frame_timestamp
     )
-
+    
 
     
     frame_timestamp += 1
 
-    # Draw landmarks
+   
     if result.hand_landmarks:
 
-        for hand in result.hand_landmarks:
+       for i, hand in enumerate(result.hand_landmarks):
 
+      
+            # Get Left / Right
+            handedness = result.handedness[i][0].category_name
+
+
+            # Count fingers
+            finger_count = counter.count_fingers(
+                hand,
+                handedness
+            )
+
+ # Draw landmarks
             for landmark in hand:
 
                 # Convert normalized coordinates
@@ -73,6 +88,24 @@ while True:
                     -1
                 )
 
+
+            # Display finger count
+           
+
+                cv2.putText(
+                frame,
+                f"{handedness} Hand: {finger_count}",
+                (50, 100 + i * 80),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1.5,
+                (0, 255, 0),
+                3
+            )
+        
+       
+
+
+
     #the borders 
     cv2.imshow(window_name,frame )
 
@@ -84,6 +117,7 @@ while True:
     #close it using the x button 
     if cv2.getWindowProperty(window_name,cv2.WND_PROP_VISIBLE)<1:
       break  
+
 
 cap.release()
 detector.close()
