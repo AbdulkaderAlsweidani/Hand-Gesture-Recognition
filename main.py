@@ -2,6 +2,24 @@ import cv2
 import mediapipe as mp
 from Finger_counter import FingerCounter
 from gesture_detector import GestureDetector
+
+print("\n===== HAND TRACKING PROJECT =====")
+print("1 - Finger Counter")
+print("2 - Gesture Recognition")
+
+choice = input("\nSelect mode: ")
+
+if choice == "1":
+    mode = "count"
+
+elif choice == "2":
+    mode = "gesture"
+
+else:
+    print("Invalid option")
+    exit()
+
+
 # camera input 
 cap= cv2.VideoCapture(0)
 
@@ -72,14 +90,16 @@ while True:
 
 
             # Count fingers
-            finger_count = counter.count_fingers(
+            finger_states = counter.get_finger_states(
                 hand,
-                handedness)
-            
-                #the hand Gesture 
+                handedness
+)
+
+            finger_count = sum(finger_states)
+
             gesture = gesture_detector.detect_gesture(
-                finger_count)
-            
+                finger_states
+)
 
  # Draw landmarks
             for landmark in hand:
@@ -97,31 +117,44 @@ while True:
 
 
             # Display finger count
-           
+            if mode == "count":
 
                 cv2.putText(
-                frame,
-                f"{handedness} Hand: {finger_count}",
-                (50, 100 + i * 80),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.5,
-                (0, 255, 0),
-                3
-            )
+                    frame,
+                    f"{handedness} Hand: {finger_count}",
+                    (50, 100 + i * 80),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1.5,
+                    (0, 255, 0),
+                    3
+    )
+
+            elif mode == "gesture":
+
                 cv2.putText(
-                frame,gesture,
-                (50, 150 + i * 100),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1.2,
-                (255, 0, 255),
-                3)
+                    frame,
+                    gesture,
+                    (50, 100 + i * 80),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    1.5,
+                    (255, 0, 255),
+                    3)
                 
        
 
 
 
     #the borders 
-    cv2.imshow(window_name,frame )
+    cv2.imshow(window_name, frame)
+    cv2.putText(
+    frame,
+    f"MODE: {mode.upper()}",
+    (20, 40),
+    cv2.FONT_HERSHEY_SIMPLEX,
+    1,
+    (255, 255, 255),
+    2
+)
 
     # closing using the "q"
     if cv2.waitKey(1)& 0xFF == ord("q"):
